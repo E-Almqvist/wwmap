@@ -5,8 +5,8 @@
 )]
 
 mod scanner;
-mod ipv4_gen;
+mod permutations;
 
 fn main() {
-    println!("Hello, world!");
+    scanner::start_scan(100);
 }
