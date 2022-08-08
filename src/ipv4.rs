@@ -1,3 +1,5 @@
+use std::net::{IpAddr, Ipv4Addr};
+
 use anyhow::{Result, anyhow};
 use convert_base::Convert;
 use crate::util;
@@ -14,7 +16,7 @@ let i = 0 .. u32:max_value()
 #[derive(Debug)]
 pub struct IPv4 {
     pub id: u64,
-    pub ip: Vec<u16>
+    pub ip: Vec<u8>
 }
 
 impl IPv4 {
@@ -22,7 +24,7 @@ impl IPv4 {
         let mut base = Convert::new(10, 256);
 
         let id_vec = util::number_to_vec(id); // push all digits into a vec
-        let mut ip = base.convert::<u8, u16>(&id_vec);
+        let mut ip = base.convert::<u8, u8>(&id_vec);
 
         // In case we are missing some digits
         if ip.len() < 4 {
@@ -35,6 +37,14 @@ impl IPv4 {
         ip = ip.into_iter().rev().collect();
 
         Self { id, ip }
+    }
+
+    pub fn to_ipaddr(self: &mut Self) -> Result<IpAddr> {
+        if let [a, b, c, d] = self.ip[0..3] { 
+            Ok(IpAddr::V4(Ipv4Addr::new(a, b, c, d)))
+        } else {
+            Err(anyhow!("Unable to unpack IPv4 address"))
+        }
     }
 }
 
