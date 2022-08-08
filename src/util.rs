@@ -24,7 +24,7 @@ fn numlen(num: u32) -> u8 {
     len
 }
 
-fn get_digits(num: u32) -> Vec<u8> {
+pub fn number_to_vec(num: u32) -> Vec<u8> {
     let out: Vec<u8> = Vec::new();
 
     let len = numlen(num);

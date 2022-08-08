@@ -1,5 +1,6 @@
 use anyhow::{Result, anyhow};
 use convert_base::Convert;
+use crate::util;
 
 /*
 Algorithm: O(n)
@@ -10,15 +11,18 @@ let i = 0 .. u32:max_value()
 # This is waaaay better than a stupid loop
 */
 
-struct IPv4 {
-    id: u32,
-    ip: Vec<u8>
+pub struct IPv4 {
+    pub id: u32,
+    pub ip: Vec<u8>
 }
 
 impl IPv4 {
-    fn new(self: &mut Self, id: u32) -> Self {
+    pub fn new(id: u32) -> Self {
         let mut base = Convert::new(10, 256);
-        let ip = base.convert::<u32, u8>(&id);
+
+        let id_vec = util::number_to_vec(id); // push all digits into a vec
+        println!("########## {:?}", id_vec);
+        let ip = base.convert::<u8, u8>(&id_vec);
 
         Self { id, ip }
     }
