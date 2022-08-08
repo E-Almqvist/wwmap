@@ -12,6 +12,8 @@ async fn check_ack(dest: &SocketAddr) -> bool {
 }
 
 pub fn start_scan(depth: u32) {
+    let ip_list = permutations::ipv4(None);
+
     let mut threads: Vec<JoinHandle<()>> = Vec::new();
 
     for i in 0..depth {

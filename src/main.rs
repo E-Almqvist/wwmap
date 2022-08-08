@@ -8,5 +8,6 @@ mod scanner;
 mod permutations;
 
 fn main() {
-    scanner::start_scan(100);
+    //    scanner::start_scan(100);
+    permutations::ipv4(None);
 }

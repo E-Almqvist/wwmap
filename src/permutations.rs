@@ -1,11 +1,48 @@
-use permutator::Permutation;
+use anyhow::{Result, anyhow};
+use convert_base::Convert;
 
-pub fn get_ipv4_permutations(start_pos: [u8; 4]) -> Vec<Vec<u8>> {
-    let perms: Vec<Vec<u8>> = Vec::new();
+/*
+Algorithm: O(n)
 
-    // (2^8)^4 = 2^32 => 32bit
-    let range: Box<[u8; u32::max_value() as usize]> = (0..u8::max_value()).collect::<Box<[u8]>>().try_into().expect("nope");
+let i = 0 .. u32:max_value()
+
+# Convert each i to base 256 and we get all the ipv4 addresses
+# This is waaaay better than a stupid loop
 
 
-    perms
+*/
+
+// TODO: make a better implementation of this function
+fn digits(n: usize) -> impl Iterator<Item = u32> {
+    n.to_string()
+        .chars()
+        .map(|digit| digit.to_digit(10).unwrap())
+        .collect::<Vec<_>>()
+        .into_iter()
+}
+
+struct IPv4 {
+    id: u32,
+    ip: Vec<u8>
+}
+
+impl IPv4 {
+    fn new(self: &mut Self, id: u32) -> Self {
+        let mut base = Convert::new(10, 256);
+        let ip = base.convert::<u32, u8>(&id);
+
+        Self { id, ip }
+    }
+}
+
+
+pub fn ipv4(blacklist: Option<Vec<[u8; 4]>>) -> Result<Vec<[u8; 4]>> {
+    let blacklist = blacklist.unwrap_or(Vec::new());
+    let ips: Vec<u32> = (0..u32::max_value()).collect();  // 32 bit max value is the last IP
+
+    //if combos.len() <= 0 {
+    Err(anyhow!("Unable to generate IPv4 permutations"))
+//     } else {
+//         Ok(combos)
+//     }
 }
