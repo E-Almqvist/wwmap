@@ -22,7 +22,17 @@ impl IPv4 {
         let mut base = Convert::new(10, 256);
 
         let id_vec = util::number_to_vec(id); // push all digits into a vec
-        let ip = base.convert::<u8, u16>(&id_vec);
+        let mut ip = base.convert::<u8, u16>(&id_vec);
+
+        // In case we are missing some digits
+        if ip.len() < 4 {
+            for i in 0..(4-ip.len()) {
+                ip.insert(0, 0);
+            }
+        }
+
+        // Reverse it so that we start from the top
+        ip = ip.into_iter().rev().collect();
 
         Self { id, ip }
     }
