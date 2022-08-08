@@ -1,7 +1,10 @@
-use std::{net::{TcpStream, SocketAddr}, thread::JoinHandle};
+use crate::ipv4;
 use log::info;
 use std::thread;
-use crate::ipv4;
+use std::{
+    net::{SocketAddr, TcpStream},
+    thread::JoinHandle,
+};
 
 async fn check_ack(dest: &SocketAddr) -> bool {
     if let Ok(res) = TcpStream::connect(dest) {
@@ -18,13 +21,12 @@ pub fn start_scan(depth: u32) {
 
     for i in 0..depth {
         let thread = thread::spawn(|| {
-            println!("hi"); 
+            println!("hi");
             // do scan
         });
         threads.push(thread);
     }
 }
-
 
 /*
 
@@ -36,4 +38,3 @@ pre:
     ALL_IPS: Vec<Vecu8>> = ...
 
 */
-

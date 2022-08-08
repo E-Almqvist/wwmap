@@ -10,8 +10,8 @@ uint ulong_len(ulong n) { // get the nth_digit length of a number
 */
 
 fn nth_digit(num: u64, idx: u32) -> u8 {
-    // ((num % (10**(idx+1))) - (num % (10**idx)))/(10**idx) 
-    (((num % (10_u64.pow(idx+1))) - (num % (10_u64.pow(idx))))/(10_u64.pow(idx))) as u8
+    // ((num % (10**(idx+1))) - (num % (10**idx)))/(10**idx)
+    (((num % (10_u64.pow(idx + 1))) - (num % (10_u64.pow(idx)))) / (10_u64.pow(idx))) as u8
 }
 
 fn numlen(mut num: u64) -> u8 {
@@ -35,7 +35,7 @@ pub fn number_to_vec(num: u64) -> Vec<u8> {
 
     for idx in 0..len {
         let digit = nth_digit(num, idx as u32);
-        out.push(digit); 
+        out.push(digit);
     }
 
     out
