@@ -1,4 +1,4 @@
-use std::net::{IpAddr, Ipv4Addr};
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
 use anyhow::{Result, anyhow};
 use convert_base::Convert;
@@ -45,6 +45,11 @@ impl IPv4 {
         } else {
             Err(anyhow!("Unable to unpack IPv4 address"))
         }
+    }
+
+    pub fn to_socketaddr(self: &mut Self, port: u16) -> Result<SocketAddr> {
+        let ip_addr = self.to_ipaddr()?;
+        Ok(SocketAddr::new(ip_addr, port))
     }
 }
 
