@@ -12,5 +12,6 @@ fn main() {
     //    scanner::start_scan(100);
     // permutations::ipv4(None);
 
-    let ip = permutations::IPv4::new(0);
+    let ip = permutations::IPv4::new(256);
+    println!("{:?}", ip);
 }

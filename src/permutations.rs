@@ -11,18 +11,19 @@ let i = 0 .. u32:max_value()
 # This is waaaay better than a stupid loop
 */
 
+#[derive(Debug)]
 pub struct IPv4 {
-    pub id: u32,
-    pub ip: Vec<u8>
+    pub id: u64,
+    pub ip: Vec<u16>
 }
 
 impl IPv4 {
-    pub fn new(id: u32) -> Self {
+    pub fn new(id: u64) -> Self {
         let mut base = Convert::new(10, 256);
 
         let id_vec = util::number_to_vec(id); // push all digits into a vec
         println!("########## {:?}", id_vec);
-        let ip = base.convert::<u8, u8>(&id_vec);
+        let ip = base.convert::<u8, u16>(&id_vec);
 
         Self { id, ip }
     }
