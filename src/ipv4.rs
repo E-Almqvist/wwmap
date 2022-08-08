@@ -22,7 +22,6 @@ impl IPv4 {
         let mut base = Convert::new(10, 256);
 
         let id_vec = util::number_to_vec(id); // push all digits into a vec
-        println!("########## {:?}", id_vec);
         let ip = base.convert::<u8, u16>(&id_vec);
 
         Self { id, ip }
@@ -30,7 +29,7 @@ impl IPv4 {
 }
 
 
-pub fn ipv4(blacklist: Option<Vec<[u8; 4]>>) -> Result<Vec<[u8; 4]>> {
+pub fn get_all(blacklist: Option<Vec<[u8; 4]>>) -> Result<Vec<[u8; 4]>> {
     let blacklist = blacklist.unwrap_or(Vec::new());
     let ips: Vec<u32> = (0..u32::max_value()).collect();  // 32 bit max value is the last IP
 

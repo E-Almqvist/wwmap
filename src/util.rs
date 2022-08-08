@@ -33,11 +33,9 @@ pub fn number_to_vec(num: u64) -> Vec<u8> {
     let mut out: Vec<u8> = Vec::new();
 
     let len = numlen(num);
-    println!("len={len}");
 
     for idx in 0..len {
         let digit = digit(num, idx as u32);
-        println!("\t{:?}", digit);
         out.push(digit); 
     }
 

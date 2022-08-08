@@ -1,7 +1,7 @@
 use std::{net::{TcpStream, SocketAddr}, thread::JoinHandle};
 use log::info;
 use std::thread;
-use crate::permutations;
+use crate::ipv4;
 
 async fn check_ack(dest: &SocketAddr) -> bool {
     if let Ok(res) = TcpStream::connect(dest) {
@@ -12,7 +12,7 @@ async fn check_ack(dest: &SocketAddr) -> bool {
 }
 
 pub fn start_scan(depth: u32) {
-    let ip_list = permutations::ipv4(None);
+    let ip_list = ipv4::get_all(None);
 
     let mut threads: Vec<JoinHandle<()>> = Vec::new();
 
