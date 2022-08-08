@@ -13,10 +13,11 @@ let i = 0 .. u32:max_value()
 # This is waaaay better than a stupid loop
 */
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct IPv4 {
     pub id: u64,
-    pub ip: Vec<u8>
+    pub ip: Vec<u8>,
+    pub ignore: bool
 }
 
 impl IPv4 {
@@ -36,7 +37,7 @@ impl IPv4 {
         // Reverse it so that we start from the top
         ip = ip.into_iter().rev().collect();
 
-        Self { id, ip }
+        Self { id, ip, ignore: false }
     }
 
     pub fn to_ipaddr(self: &mut Self) -> Result<IpAddr> {
@@ -53,14 +54,22 @@ impl IPv4 {
     }
 }
 
+pub fn get_all(ignorelist: Option<Vec<u64>>) -> Result<Vec<IPv4>> {
+    // Ignore those that we know
+    let ignorelist = ignorelist.unwrap_or(Vec::new());
 
-pub fn get_all(blacklist: Option<Vec<[u8; 4]>>) -> Result<Vec<[u8; 4]>> {
-    let blacklist = blacklist.unwrap_or(Vec::new());
-    let ips: Vec<u32> = (0..u32::max_value()).collect();  // 32 bit max value is the last IP
+    // Get all of the "ids"
+    let ids: Vec<u32> = (0..u32::max_value()).collect();
 
-    //if combos.len() <= 0 {
-    Err(anyhow!("Unable to generate IPv4 permutations"))
-//     } else {
-//         Ok(combos)
-//     }
+    let ips: Vec<IPv4> = ids.iter().map(|&ip| {
+        // Make IP
+        let mut ip = IPv4::new(ip as u64);
+
+        // Make the IP "ignored" if it is in the ignorelist
+        if ignorelist.len() > 0 && ignorelist.contains(&ip.id) { ip.ignore = true; }
+
+        ip
+    }).collect();
+
+    Ok(ips)
 }
