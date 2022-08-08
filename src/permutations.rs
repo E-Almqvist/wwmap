@@ -8,18 +8,7 @@ let i = 0 .. u32:max_value()
 
 # Convert each i to base 256 and we get all the ipv4 addresses
 # This is waaaay better than a stupid loop
-
-
 */
-
-// TODO: make a better implementation of this function
-fn digits(n: usize) -> impl Iterator<Item = u32> {
-    n.to_string()
-        .chars()
-        .map(|digit| digit.to_digit(10).unwrap())
-        .collect::<Vec<_>>()
-        .into_iter()
-}
 
 struct IPv4 {
     id: u32,

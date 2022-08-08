@@ -4,6 +4,7 @@
     //unused_imports, // TODO: rm
 )]
 
+mod util;
 mod scanner;
 mod permutations;
 
