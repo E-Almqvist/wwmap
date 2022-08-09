@@ -13,10 +13,10 @@ let i = 0 .. u32:max_value()
 # This is waaaay better than a stupid loop
 */
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct IPv4 {
     pub id: u64,
-    pub ip: Vec<u8>,
+    pub ip: [u8; 4],
     pub ignore: bool,
 }
 
