@@ -2,10 +2,7 @@ use crate::ipv4;
 use anyhow::Result;
 use log::info;
 //use std::thread;
-use std::{
-    net::{SocketAddr, TcpStream},
-    //thread::JoinHandle,
-};
+use std::net::{SocketAddr, TcpStream};
 
 fn tcp_scan(dest: &SocketAddr) -> bool {
     if let Ok(res) = TcpStream::connect(dest) {
@@ -18,9 +15,9 @@ fn tcp_scan(dest: &SocketAddr) -> bool {
 // TODO: do thread optimization
 
 // pub fn scan(target: &ipv4::IPv4) -> bool {
-//     true 
+//     true
 // }
-// 
+//
 // fn create_scan_thread(ip_list: Vec<ipv4::IPv4>, thread_id: u32, ips_per_thread: u32, results_list: &Vec<bool>) -> JoinHandle<Vec<bool>> {
 //     thread::spawn(move || {
 //         let results: Vec<bool> = Vec::new();
@@ -30,32 +27,32 @@ fn tcp_scan(dest: &SocketAddr) -> bool {
 //             let ref target = ip_list[id as usize];
 //             let result = scan(&target);
 //         }
-// 
+//
 //         results
-//     }) 
+//     })
 // }
-// 
+//
 pub fn start_scan(target_port: u16, num_threads: u32, ignorelist: Option<Vec<u64>>) -> Result<()> {
     let ip_list = ipv4::get_all(ignorelist)?;
 
     // casting hell
-//     let ips_per_thread = ((ip_list.len() as f32) / num_threads as f32) as u32;
-//     let ips_left = num_threads * ips_per_thread; // how many IPs we have left after the first threads
-// 
-//     // Container for all of our threads
-//     let mut threads: Vec<JoinHandle<()>> = Vec::new();
-// 
-//     // Create all of our threads
-//     for thread_id in 0..num_threads {
-//         threads.push( create_scan_thread(ip_list.borrow().clone(), thread_id, ips_per_thread) );
-//     }
-// 
-//     // Create the last thread to do the job
+    //     let ips_per_thread = ((ip_list.len() as f32) / num_threads as f32) as u32;
+    //     let ips_left = num_threads * ips_per_thread; // how many IPs we have left after the first threads
+    //
+    //     // Container for all of our threads
+    //     let mut threads: Vec<JoinHandle<()>> = Vec::new();
+    //
+    //     // Create all of our threads
+    //     for thread_id in 0..num_threads {
+    //         threads.push( create_scan_thread(ip_list.borrow().clone(), thread_id, ips_per_thread) );
+    //     }
+    //
+    //     // Create the last thread to do the job
 
     let mut results: Vec<bool> = Vec::new();
 
     ip_list.iter().for_each(|ip| {
-        if !ip.ignore { 
+        if !ip.ignore {
             let target = ip.to_socketaddr(target_port).unwrap();
             results.push(tcp_scan(&target));
         }

@@ -72,7 +72,7 @@ pub fn get_all(ignorelist: Option<Vec<u64>>) -> Result<Vec<IPv4>> {
             let mut ip = IPv4::new(ip as u64);
 
             // Make the IP "ignored" if it is in the ignorelist
-            ip.ignore = ignorelist.contains(&ip.id); 
+            ip.ignore = ignorelist.contains(&ip.id);
 
             ip
         })
