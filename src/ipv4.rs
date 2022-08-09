@@ -13,7 +13,7 @@ let i = 0 .. u32:max_value()
 # This is waaaay better than a stupid loop
 */
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 pub struct IPv4 {
     pub id: u64,
     pub ip: Vec<u8>,
@@ -72,9 +72,7 @@ pub fn get_all(ignorelist: Option<Vec<u64>>) -> Result<Vec<IPv4>> {
             let mut ip = IPv4::new(ip as u64);
 
             // Make the IP "ignored" if it is in the ignorelist
-            if ignorelist.len() > 0 && ignorelist.contains(&ip.id) {
-                ip.ignore = true;
-            }
+            ip.ignore = ignorelist.contains(&ip.id); 
 
             ip
         })

@@ -1,5 +1,5 @@
 use crate::ipv4;
-use anyhow::{Result, anyhow};
+use anyhow::Result;
 use log::info;
 use std::thread;
 use std::{
@@ -7,7 +7,7 @@ use std::{
     thread::JoinHandle,
 };
 
-async fn tcp_scan(dest: &SocketAddr) -> bool {
+fn tcp_scan(dest: &SocketAddr) -> bool {
     if let Ok(res) = TcpStream::connect(dest) {
         info!("Got TCP ack from: {:?}", dest);
         return true;
@@ -15,23 +15,32 @@ async fn tcp_scan(dest: &SocketAddr) -> bool {
     false
 }
 
-pub fn start_scan(target_port: u16, num_threads: u32, ignorelist: Vec<u64>) -> Result<()> {
-    let ip_list = ipv4::get_all(None)?;
+pub fn scan(target: &ipv4::IPv4) -> bool {
+    true 
+}
+
+pub fn start_scan(target_port: u16, num_threads: u32, ignorelist: Option<Vec<u64>>) -> Result<()> {
+    let ip_list = ipv4::get_all(ignorelist)?;
 
     // casting hell
-    // Get the amount of needed threads
-    let needed_threads = ((ip_list.len() as f32) / num_threads as f32).ceil() as u32;
+    let ips_per_thread = ((ip_list.len() as f32) / num_threads as f32) as u32;
+    let ips_left = num_threads * ips_per_thread; // how many IPs we have left after the first threads
 
     // Container for all of our threads
     let mut threads: Vec<JoinHandle<()>> = Vec::new();
 
     // Create all of our threads
-    for i in 0..needed_threads {
-        let thread = thread::spawn(|| {
-            // do scan
-            let target = ip_list[i as usize].to_socketaddr(target_port)?;
-        });
-        threads.push(thread);
+    for thread_id in 0..num_threads {
+        threads.push( 
+            thread::spawn(move || {
+                // do the scan thing
+                for i in 0..ips_per_thread {
+                    let id = (thread_id * ips_per_thread) + i;
+                    let ref target = ip_list[id as usize];
+                    let result = scan(&target);
+                }
+            }) 
+        );
     }
 
     Ok(())
