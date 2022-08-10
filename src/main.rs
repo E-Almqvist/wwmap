@@ -3,6 +3,11 @@ mod scanner;
 mod util;
 mod cli;
 
-//use ipv4::IPv4;
+use clap::Parser;
+use cli::Args;
 
-fn main() {}
+fn main() {
+    let args = Args::parse();
+
+    println!("{:?}", args);
+}
