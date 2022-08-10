@@ -1,7 +1,7 @@
+mod cli;
 mod ipv4;
 mod scanner;
 mod util;
-mod cli;
 
 use clap::Parser;
 use cli::Args;
