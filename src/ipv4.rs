@@ -1,8 +1,8 @@
-use std::net::{IpAddr, Ipv4Addr, SocketAddr};
-use std::convert::TryInto;
 use crate::util;
 use anyhow::{anyhow, Result};
 use convert_base::Convert;
+use std::convert::TryInto;
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
 /*
 Algorithm: O(n)
@@ -38,7 +38,9 @@ impl IPv4 {
         ip = ip.into_iter().rev().collect();
 
         // convert to array
-        let ip: [u8; 4] = ip.try_into().unwrap_or_else(|_: Vec<u8>| panic!("Unable to convert Vec to [u8; 4] for IPv4!"));
+        let ip: [u8; 4] = ip
+            .try_into()
+            .unwrap_or_else(|_: Vec<u8>| panic!("Unable to convert Vec to [u8; 4] for IPv4!"));
 
         Self {
             id,

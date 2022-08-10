@@ -4,6 +4,4 @@ mod util;
 
 //use ipv4::IPv4;
 
-fn main() {
-}
-
+fn main() {}
