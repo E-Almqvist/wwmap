@@ -29,7 +29,7 @@ impl IPv4 {
 
         // In case we are missing some digits
         if ip.len() < 4 {
-            for i in 0..(4 - ip.len()) {
+            for _ in 0..(4 - ip.len()) {
                 ip.insert(0, 0);
             }
         }
@@ -38,7 +38,7 @@ impl IPv4 {
         ip = ip.into_iter().rev().collect();
 
         // convert to array
-        let ip: [u8; 4] = ip.try_into().unwrap_or_else(|v: Vec<u8>| panic!("Unable to convert Vec to [u8; 4] for IPv4!"));
+        let ip: [u8; 4] = ip.try_into().unwrap_or_else(|_: Vec<u8>| panic!("Unable to convert Vec to [u8; 4] for IPv4!"));
 
         Self {
             id,
