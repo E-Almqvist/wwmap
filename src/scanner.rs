@@ -9,6 +9,7 @@ fn tcp_scan(mut target: ipv4::IPv4, target_port: u16) -> bool {
     let dest = target.to_socketaddr(target_port).unwrap();
 
     false
+// TODO: FIX
 //     if let Ok(res) = TcpStream::connect(dest) {
 //         info!("* Got TCP ack from: {:?} | {:?}", dest, res);
 //         return true;

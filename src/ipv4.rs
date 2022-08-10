@@ -18,6 +18,9 @@ pub struct IPv4 {
     pub id: u64,
     pub ip: [u8; 4],
     pub ignore: bool,
+//     pub enum __Generator {
+//         Start(&'static)
+//     }
 }
 
 impl IPv4 {
