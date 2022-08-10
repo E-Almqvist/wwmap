@@ -25,13 +25,14 @@ fn create_scan_thread(
     ips_per_thread: u32,
 ) -> JoinHandle<Vec<bool>> {
     thread::spawn(move || {
-        let results: Vec<bool> = Vec::new();
+        let mut results: Vec<bool> = Vec::new();
 
         // do the scan thing
         for i in 0..ips_per_thread {
             let id = (thread_id * ips_per_thread) + i;
             let ref target = ip_list[id as usize];
             let result = scan(&target);
+            results.push(result);
         }
 
         results
@@ -51,13 +52,16 @@ pub fn start_scan(target_port: u16, num_threads: u32, ignorelist: Option<Vec<u64
     // create all of our threads
     for thread_id in 0..num_threads {
         threads.push(create_scan_thread(
-            ip_list,
+            ip_list.clone(),
             thread_id,
             ips_per_thread,
         ));
     }
 
     // create the last thread to do the job
+    if ips_left > 0 {
+        threads.push(create_scan_thread(ip_list, num_threads, ips_left));
+    }
 
     Ok(())
 }
