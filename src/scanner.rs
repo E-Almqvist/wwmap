@@ -1,18 +1,19 @@
 use crate::ipv4;
 use anyhow::Result;
 use log::info;
-use std::net::{SocketAddr, TcpStream};
+use std::net::TcpStream;
 use std::thread;
 use std::thread::JoinHandle;
 
 fn tcp_scan(mut target: ipv4::IPv4, target_port: u16) -> bool {
     let dest = target.to_socketaddr(target_port).unwrap();
 
-    if let Ok(res) = TcpStream::connect(dest) {
-        info!("* Got TCP ack from: {:?} | {:?}", dest, res);
-        return true;
-    }
     false
+//     if let Ok(res) = TcpStream::connect(dest) {
+//         info!("* Got TCP ack from: {:?} | {:?}", dest, res);
+//         return true;
+//     }
+//     false
 }
 
 fn create_scan_thread(
@@ -38,7 +39,10 @@ fn create_scan_thread(
 }
 
 pub fn start_scan(target_port: u16, num_threads: u32, ignorelist: Option<Vec<u64>>) -> Result<()> {
+    println!("Starting wwmap...");
     let ip_list = ipv4::get_all(ignorelist)?;
+
+    println!("Post list gen");
 
     let ips_per_thread = ((ip_list.len() as f32) / num_threads as f32) as u32;
     let ips_left = num_threads * ips_per_thread; // how many ips we have left after the first threads
@@ -66,6 +70,8 @@ pub fn start_scan(target_port: u16, num_threads: u32, ignorelist: Option<Vec<u64
             target_port,
         ));
     }
+
+    // Append all of the results into the list
 
     Ok(())
 }

@@ -6,8 +6,10 @@ mod util;
 use clap::Parser;
 use cli::Args;
 
+use scanner::start_scan;
+
 fn main() {
     let args = Args::parse();
 
-    println!("{:?}", args);
+    let _results = start_scan(args.port, args.threads as u32, None).unwrap();
 }

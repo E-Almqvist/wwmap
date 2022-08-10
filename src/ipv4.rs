@@ -68,20 +68,17 @@ pub fn get_all(ignorelist: Option<Vec<u64>>) -> Result<Vec<IPv4>> {
     let ignorelist = ignorelist.unwrap_or(Vec::new());
 
     // Get all of the "ids"
-    let ids: Vec<u32> = (0..u32::max_value()).collect();
+    let mut ips: Vec<IPv4> = Vec::new();
 
-    let ips: Vec<IPv4> = ids
-        .iter()
-        .map(|&ip| {
-            // Make IP
-            let mut ip = IPv4::new(ip as u64);
+    for id in 0..u32::max_value() {
+        // Make IP
+        let mut ip = IPv4::new(id as u64);
 
-            // Make the IP "ignored" if it is in the ignorelist
-            ip.ignore = ignorelist.contains(&ip.id);
+        // Make the IP "ignored" if it is in the ignorelist
+        ip.ignore = ignorelist.contains(&ip.id);
 
-            ip
-        })
-        .collect();
+        ips.push(ip);
+    }
 
     Ok(ips)
 }
