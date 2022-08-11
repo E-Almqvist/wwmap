@@ -41,7 +41,7 @@ fn create_scan_worker(
     thread_id: u32,
     ips_per_thread: u32,
     target_port: u16,
-    ignorelist: &mut Vec<u32>,
+    ignorelist: Vec<u32>,
 ) -> JoinHandle<Vec<bool>> {
     let (f, t) = (
         (thread_id * ips_per_thread),
@@ -67,7 +67,7 @@ fn start_scan(
     let mut threads: Vec<JoinHandle<Vec<bool>>> = Vec::new();
 
     for thread_id in 0..num_threads {
-        let id_ignorelist = ignorelist.unwrap().cloned().unwrap_or_else(Vec::new());
+        let id_ignorelist = ignorelist.clone().unwrap_or_default();
 
         // Create a worker
         let worker = create_scan_worker(thread_id, ips_per_thread, target_port, id_ignorelist);

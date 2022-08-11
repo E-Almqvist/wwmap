@@ -61,7 +61,7 @@ pub struct IPv4Range {
 }
 
 impl IPv4Range {
-    pub fn new(from: u32, to: u32, id_ignore: &mut Vec<u32>) -> Self {
+    pub fn new(from: u32, to: u32, id_ignore: Vec<u32>) -> Self {
         let to = to.clamp(0, u32::max_value());
 
         if from >= to {
@@ -71,7 +71,7 @@ impl IPv4Range {
         Self {
             id_start: from,
             id_end: to,
-            id_ignore: id_ignore.to_vec(),
+            id_ignore,
         }
     }
 }
