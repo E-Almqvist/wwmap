@@ -4,23 +4,11 @@ use convert_base::Convert;
 use std::convert::TryInto;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
-/*
-Algorithm: O(n)
-
-let i = 0 .. u32:max_value()
-
-# Convert each i to base 256 and we get all the ipv4 addresses
-# This is waaaay better than a stupid loop
-*/
-
 #[derive(Debug, Copy, Clone)]
 pub struct IPv4 {
     pub id: u64,
     pub ip: [u8; 4],
     pub ignore: bool,
-//     pub enum __Generator {
-//         Start(&'static)
-//     }
 }
 
 impl IPv4 {
@@ -63,6 +51,40 @@ impl IPv4 {
     pub fn to_socketaddr(self: &mut Self, port: u16) -> Result<SocketAddr> {
         let ip_addr = self.to_ipaddr()?;
         Ok(SocketAddr::new(ip_addr, port))
+    }
+}
+
+pub struct IPv4_Range {
+    pub id_start: u32,
+    pub id_end: u32,
+    pub id_ignore: Vec<u32>,
+}
+
+impl IPv4_Range {
+    pub fn new(from: u32, to: u32, id_ignore: Option<Vec<u32>>) -> Self {
+        Self {
+            id_start: from,
+            id_end: to,
+            id_ignore: id_ignore.unwrap_or(Vec::new()),
+        }
+    }
+}
+
+impl Iterator for IPv4_Range {
+    type Item = u32;
+
+    fn next(&mut self) -> Option<u32> {
+        if self.id_start == self.id_end {
+            None
+        } else {
+            let res = Some(self.id_start);
+            self.id_start += 1;
+
+            if self.id_ignore.contains(&res.unwrap()) {
+                return self.next();
+            }
+            res
+        }
     }
 }
 
