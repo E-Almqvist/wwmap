@@ -70,12 +70,7 @@ fn start_scan(
         let id_ignorelist = ignorelist.unwrap().cloned().unwrap_or_else(Vec::new());
 
         // Create a worker
-        let worker = create_scan_worker(
-            thread_id,
-            ips_per_thread,
-            target_port,
-            id_ignorelist
-        );
+        let worker = create_scan_worker(thread_id, ips_per_thread, target_port, id_ignorelist);
         threads.push(worker);
     }
 
