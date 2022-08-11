@@ -62,6 +62,12 @@ pub struct IPv4_Range {
 
 impl IPv4_Range {
     pub fn new(from: u32, to: u32, id_ignore: Option<Vec<u32>>) -> Self {
+        to = to.clamp(0, u32::max_value());
+
+        if from >= to {
+            panic!("Range size must be >= 1! from: {} >= to: {}", from, to);
+        } 
+
         Self {
             id_start: from,
             id_end: to,
