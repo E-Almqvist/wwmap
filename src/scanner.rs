@@ -56,7 +56,7 @@ fn start_scan(
     to: u32,
     target_port: u16,
     num_threads: u32,
-    ignorelist: Option<&mut Vec<u32>>,
+    ignorelist: Option<Vec<u32>>,
 ) -> Result<()> {
     println!("Starting wwmap...");
 
@@ -67,14 +67,14 @@ fn start_scan(
     let mut threads: Vec<JoinHandle<Vec<bool>>> = Vec::new();
 
     for thread_id in 0..num_threads {
-        let thread_ignorelist = ignorelist.unwrap_or(&mut Vec::new());
+        let id_ignorelist = ignorelist.unwrap().cloned().unwrap_or_else(Vec::new());
 
         // Create a worker
         let worker = create_scan_worker(
             thread_id,
             ips_per_thread,
             target_port,
-            thread_ignorelist
+            id_ignorelist
         );
         threads.push(worker);
     }

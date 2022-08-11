@@ -71,7 +71,7 @@ impl IPv4Range {
         Self {
             id_start: from,
             id_end: to,
-            id_ignore
+            id_ignore: id_ignore.to_vec()
         }
     }
 }
