@@ -54,19 +54,19 @@ impl IPv4 {
     }
 }
 
-pub struct IPv4_Range {
+pub struct IPv4Range {
     pub id_start: u32,
     pub id_end: u32,
     pub id_ignore: Vec<u32>,
 }
 
-impl IPv4_Range {
+impl IPv4Range {
     pub fn new(from: u32, to: u32, id_ignore: Option<Vec<u32>>) -> Self {
         to = to.clamp(0, u32::max_value());
 
         if from >= to {
             panic!("Range size must be >= 1! from: {} >= to: {}", from, to);
-        } 
+        }
 
         Self {
             id_start: from,
@@ -76,7 +76,7 @@ impl IPv4_Range {
     }
 }
 
-impl Iterator for IPv4_Range {
+impl Iterator for IPv4Range {
     type Item = u32;
 
     fn next(&mut self) -> Option<u32> {

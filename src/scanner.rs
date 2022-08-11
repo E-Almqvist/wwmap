@@ -1,4 +1,4 @@
-use crate::ipv4::{IPv4, IPv4_Range};
+use crate::ipv4::{IPv4, IPv4Range};
 use anyhow::Result;
 use log::info;
 use std::net::TcpStream;
@@ -17,7 +17,11 @@ fn tcp_scan(mut target: IPv4, target_port: u16) -> bool {
     //     false
 }
 
-fn create_scan_thread(thread_id: u32, ip_range: IPv4_Range, target_port: u16) -> JoinHandle<Vec<bool>> {
+fn create_scan_thread(
+    thread_id: u32,
+    ip_range: IPv4Range,
+    target_port: u16,
+) -> JoinHandle<Vec<bool>> {
     thread::spawn(move || {
         info!("Starting thread worker #{}", thread_id);
         let mut results: Vec<bool> = Vec::new();
@@ -55,9 +59,9 @@ pub fn start_scan(
             (thread_id * ips_per_thread),
             ((thread_id + 1) * ips_per_thread),
         );
-        let range = IPv4_Range::new(f, t, ignorelist);
+        let range = IPv4Range::new(f, t, ignorelist);
 
-        // Create a worker 
+        // Create a worker
         let worker = create_scan_thread(thread_id, range, target_port);
         threads.push(worker);
     }
