@@ -1,12 +1,14 @@
 use crate::ipv4::{IPv4, IPv4Range};
 use anyhow::Result;
 use log::info;
-use std::net::TcpStream;
+use std::net::{SocketAddr, TcpStream};
 use std::thread;
 use std::thread::JoinHandle;
 
 fn tcp_scan(mut target: IPv4, target_port: u16) -> bool {
-    let dest = target.to_socketaddr(target_port).unwrap();
+    let _dest = target
+        .to_socketaddr(target_port)
+        .unwrap_or_else(|e| panic!("{}", e));
 
     false
     // TODO: FIX
@@ -30,7 +32,7 @@ fn create_scan_thread(
         ip_range.into_iter().for_each(|id| {
             let target = IPv4::new(id as u64);
             let result = tcp_scan(target, target_port);
-            results.insert(id as usize, result);
+            results.push(result);
         });
 
         results
@@ -41,7 +43,7 @@ fn create_scan_worker(
     thread_id: u32,
     ips_per_thread: u32,
     target_port: u16,
-    ignorelist: Vec<u32>
+    ignorelist: Vec<u32>,
 ) -> JoinHandle<Vec<bool>> {
     let (f, t) = (
         (thread_id * ips_per_thread),
@@ -56,7 +58,7 @@ fn create_scan_workers(
     to: u32,
     target_port: u16,
     num_threads: u32,
-    ignorelist: Option<Vec<u32>>
+    ignorelist: Option<Vec<u32>>,
 ) -> Vec<JoinHandle<Vec<bool>>> {
     println!("Starting wwmap...");
 
@@ -77,7 +79,12 @@ fn create_scan_workers(
     // Clean up the rest
     if ips_left > 0 {
         let id_ignorelist = ignorelist.clone().unwrap_or_default();
-        threads.push(create_scan_worker(threads.len() as u32 + 1, ips_per_thread, target_port, id_ignorelist));
+        threads.push(create_scan_worker(
+            threads.len() as u32 + 1,
+            ips_per_thread,
+            target_port,
+            id_ignorelist,
+        ));
     }
 
     threads
@@ -88,7 +95,7 @@ pub fn start_scan(
     to: u32,
     target_port: u16,
     num_threads: u32,
-    ignorelist: Option<Vec<u32>>
+    ignorelist: Option<Vec<u32>>,
 ) {
     let threads = create_scan_workers(from, to, target_port, num_threads, ignorelist);
 

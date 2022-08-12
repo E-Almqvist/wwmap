@@ -41,10 +41,10 @@ impl IPv4 {
     }
 
     pub fn to_ipaddr(self: &mut Self) -> Result<IpAddr> {
-        if let [a, b, c, d] = self.ip[0..3] {
+        if let [a, b, c, d] = self.ip[0..4] {
             Ok(IpAddr::V4(Ipv4Addr::new(a, b, c, d)))
         } else {
-            Err(anyhow!("Unable to unpack IPv4 address"))
+            Err(anyhow!("Unable to unpack IPv4 address: {:?}", self.ip))
         }
     }
 
