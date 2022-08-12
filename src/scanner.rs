@@ -51,13 +51,13 @@ fn create_scan_worker(
     create_scan_thread(thread_id, range, target_port)
 }
 
-fn get_scan_workers_results(
+fn get_scan_workers(
     from: u32,
     to: u32,
     target_port: u16,
     num_threads: u32,
     ignorelist: Option<Vec<u32>>,
-) -> Vec<(u32, bool)> {
+) -> Vec<JoinHandle<Vec<(u32, bool)>>> {
     println!("Starting wwmap...");
 
     let ips_per_thread = (((to - from) as f32) / num_threads as f32) as u32;
@@ -73,8 +73,7 @@ fn get_scan_workers_results(
         let id_ignorelist = ignorelist.clone().unwrap_or_default();
 
         // Create a worker
-        let worker =
-            create_scan_worker(thread_id, ips_per_thread, target_port, id_ignorelist);
+        let worker = create_scan_worker(thread_id, ips_per_thread, target_port, id_ignorelist);
 
         threads.push(worker);
     }
@@ -91,7 +90,7 @@ fn get_scan_workers_results(
         threads.push(worker);
     }
 
-    results
+    threads
 }
 
 pub fn start_scan(
@@ -101,10 +100,20 @@ pub fn start_scan(
     num_threads: u32,
     ignorelist: Option<Vec<u32>>,
 ) {
-    let scan_results = get_scan_workers_results(from, to, target_port, num_threads, ignorelist);
 
-    println!("--RESULTS--");
-    scan_results.iter().for_each(|r| {
-        println!("\t* {r:?}");
-    });
+    // Get the workers
+    let scan_workers = get_scan_workers(from, to, target_port, num_threads, ignorelist);
+
+    let results: Vec<Vec<(u32, bool)>>  = Vec::new();
+    
+    // Run everyone
+    for worker in scan_workers {
+        let mut result = worker.join();
+
+        match result {
+            Ok(_) => let result = result.unwrap(),
+            Err(e) => panic!(":(")
+        }
+
+    }
 }
