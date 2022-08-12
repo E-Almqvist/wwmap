@@ -59,7 +59,7 @@ fn create_scan_worker(
     }
 }
 
-fn create_scan_workers(
+fn get_scan_workers_results(
     from: u32,
     to: u32,
     target_port: u16,
@@ -110,9 +110,9 @@ pub fn start_scan(
     num_threads: u32,
     ignorelist: Option<Vec<u32>>,
 ) {
-    let threads = create_scan_workers(from, to, target_port, num_threads, ignorelist);
+    let scan_results = get_scan_workers_results(from, to, target_port, num_threads, ignorelist);
 
-    threads.iter().for_each(|t| {
-        println!("{t:?}");
+    scan_results.iter().for_each(|r| {
+        println!("{r:?}");
     });
 }
