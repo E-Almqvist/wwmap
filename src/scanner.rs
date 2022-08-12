@@ -111,7 +111,7 @@ pub fn start_scan(
         let mut result = worker.join();
 
         match result {
-            Ok(_) => let result = result.unwrap(),
+            Ok(_) => return result.unwrap(),
             Err(e) => panic!(":(")
         }
 
