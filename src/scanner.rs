@@ -6,17 +6,15 @@ use std::thread::JoinHandle;
 use std::{panic, thread};
 
 fn tcp_scan(mut target: IPv4, target_port: u16) -> bool {
-    let _dest = target
+    let dest = target
         .to_socketaddr(target_port)
         .unwrap_or_else(|e| panic!("{}", e));
 
+    if let Ok(res) = TcpStream::connect(dest) {
+        info!("* Got TCP ack from: {:?} | {:?}", dest, res);
+        return true;
+    }
     false
-    // TODO: FIX
-    //     if let Ok(res) = TcpStream::connect(dest) {
-    //         info!("* Got TCP ack from: {:?} | {:?}", dest, res);
-    //         return true;
-    //     }
-    //     false
 }
 
 fn create_scan_thread(
@@ -44,19 +42,13 @@ fn create_scan_worker(
     ips_per_thread: u32,
     target_port: u16,
     ignorelist: Vec<u32>,
-) -> thread::Result<Vec<(u32, bool)>> {
+) -> JoinHandle<Vec<(u32, bool)>> {
     let (f, t) = (
         (thread_id * ips_per_thread),
         ((thread_id + 1) * ips_per_thread),
     );
     let range = IPv4Range::new(f, t, ignorelist);
-    let thread = create_scan_thread(thread_id, range, target_port);
-    let result = thread.join();
-
-    match result {
-        Ok(_) => return result,
-        Err(e) => panic!("** Worker panic! {:?}", e),
-    }
+    create_scan_thread(thread_id, range, target_port)
 }
 
 fn get_scan_workers_results(
@@ -72,7 +64,7 @@ fn get_scan_workers_results(
     let ips_left = (to - from) - (num_threads * ips_per_thread); // how many ips we have left after the first threads
 
     // container for all of our threads
-    // let mut threads: Vec<JoinHandle<Vec<bool>>> = Vec::new();
+    let mut threads: Vec<JoinHandle<Vec<(u32, bool)>>> = Vec::new();
 
     // container for all of our results
     let mut results: Vec<(u32, bool)> = Vec::new();
@@ -81,23 +73,22 @@ fn get_scan_workers_results(
         let id_ignorelist = ignorelist.clone().unwrap_or_default();
 
         // Create a worker
-        let mut worker_results =
-            create_scan_worker(thread_id, ips_per_thread, target_port, id_ignorelist).unwrap();
+        let worker =
+            create_scan_worker(thread_id, ips_per_thread, target_port, id_ignorelist);
 
-        results.append(&mut worker_results);
+        threads.push(worker);
     }
 
     // Clean up the rest
     if ips_left > 0 {
         let id_ignorelist = ignorelist.clone().unwrap_or_default();
-        let mut worker_results = create_scan_worker(
+        let worker = create_scan_worker(
             results.len() as u32 + 1,
             ips_per_thread,
             target_port,
             id_ignorelist,
-        )
-        .unwrap();
-        results.append(&mut worker_results);
+        );
+        threads.push(worker);
     }
 
     results
@@ -112,7 +103,8 @@ pub fn start_scan(
 ) {
     let scan_results = get_scan_workers_results(from, to, target_port, num_threads, ignorelist);
 
+    println!("--RESULTS--");
     scan_results.iter().for_each(|r| {
-        println!("{r:?}");
+        println!("\t* {r:?}");
     });
 }

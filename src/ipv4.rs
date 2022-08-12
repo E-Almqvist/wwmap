@@ -94,7 +94,7 @@ impl Iterator for IPv4Range {
     }
 }
 
-pub fn get_all(ignorelist: Option<Vec<u64>>) -> Result<Vec<IPv4>> {
+pub fn _get_all(ignorelist: Option<Vec<u64>>) -> Result<Vec<IPv4>> {
     // Ignore those that we know
     let ignorelist = ignorelist.unwrap_or(Vec::new());
 
