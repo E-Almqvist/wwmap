@@ -24,6 +24,22 @@ pub struct Args {
     pub ignorelist: PathBuf,
 
     #[clap(
+        help = "From IPv4 -",
+        short = 'f',
+        long = "from",
+        default_value_t = 0
+    )]
+    pub from: u32,
+
+    #[clap(
+        help = "To IPv4 -",
+        short = 't',
+        long = "to",
+        default_value_t = 4294967295
+    )]
+    pub to: u32,
+
+    #[clap(
         help = "Enable verbose (debug) output",
         short = 'v',
         long = "verbose",
