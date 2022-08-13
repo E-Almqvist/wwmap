@@ -13,7 +13,7 @@ pub struct Args {
         long = "threads",
         default_value_t = 1
     )]
-    pub threads: u8,
+    pub threads: u64,
 
     #[clap(
         help = "A file containing ignored IPv4 addresses (seperated by linebreaks).",
