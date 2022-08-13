@@ -12,11 +12,13 @@ fn tcp_scan(mut target: IPv4, target_port: u16) -> bool {
 
     let timeout = Duration::new(1, 0);
 
+    println!("Sending TCP packet to: {:?} port={}", target, target_port);
     if let Ok(res) = TcpStream::connect_timeout(&dest, timeout) {
-        info!("* Got TCP ack from: {:?} | {:?}", dest, res);
-        return true;
+        println!("** Got TCP ack from: {:?} | {:?}", dest, res);
+        true
+    } else {
+        false
     }
-    false
 }
 
 fn create_scan_thread(
@@ -25,7 +27,7 @@ fn create_scan_thread(
     target_port: u16,
 ) -> JoinHandle<Vec<(u32, bool)>> {
     thread::spawn(move || {
-        info!("Creating thread worker #{}", thread_id);
+        println!("Creating thread worker #{}", thread_id);
         let mut results: Vec<(u32, bool)> = Vec::new();
 
         // do the scan thing
