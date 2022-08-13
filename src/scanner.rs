@@ -1,6 +1,6 @@
 use crate::ipv4::{IPv4, IPv4Range};
-use log::info;
 use core::time::Duration;
+use log::info;
 use std::net::TcpStream;
 use std::thread::JoinHandle;
 use std::{panic, thread};
@@ -93,32 +93,49 @@ fn get_scan_workers(
     threads
 }
 
+#[derive(Debug)]
+pub struct ScanResult {
+    pub id: u32,
+    pub ipv4: IPv4,
+    pub result: bool,
+}
+
+impl ScanResult {
+    fn from_tuple(result_tuple: (u32, bool)) -> Self {
+        let (id, result) = result_tuple;
+        let ipv4 = IPv4::new(id as u64);
+        Self { id, ipv4, result }
+    }
+}
+
 pub fn start_scan(
     from: u32,
     to: u32,
     target_port: u16,
     num_threads: u32,
     ignorelist: Option<Vec<u32>>,
-) -> Vec<(u32, bool)> {
-
+) -> Vec<ScanResult> {
     // Get the workers
-    println!("Getting workers..");
+
     let scan_workers = get_scan_workers(from, to, target_port, num_threads, ignorelist);
 
-    let mut results: Vec<(u32, bool)>  = Vec::new();
-    
-    // Run all the workers 
-    println!("Running workers:");
+    let mut results: Vec<ScanResult> = Vec::new();
+
+    // Run all the workers
     for worker in scan_workers {
         print!("\t* worker={:?}", worker);
-        let mut result = match worker.join() {
+        let result_tuples = match worker.join() {
             Ok(r) => r,
-            Err(e) => panic!("{:?}", e)
+            Err(e) => panic!("{:?}", e),
         };
 
-        println!(" result={:?}", result);
+        let mut worker_results = result_tuples
+            .iter()
+            .map(|res| ScanResult::from_tuple(*res))
+            .collect();
 
-        results.append(&mut result);
+        //let result = ScanResult::from_tuple(result_tuples);
+        results.append(&mut worker_results);
     }
 
     println!("End of scan!");

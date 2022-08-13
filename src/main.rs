@@ -12,5 +12,7 @@ fn main() {
 
     let results = start_scan(args.from, args.to, args.port, args.threads as u32, None);
 
-    for result in results { println!("{:?}", result); }
+    for result in results {
+        println!("{:?}", result);
+    }
 }
