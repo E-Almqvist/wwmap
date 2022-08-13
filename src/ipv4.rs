@@ -7,7 +7,7 @@ use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 #[derive(Debug, Copy, Clone)]
 pub struct IPv4 {
     pub id: u64,
-    pub ip: [u8; 4]
+    pub ip: [u8; 4],
 }
 
 impl IPv4 {
@@ -25,17 +25,14 @@ impl IPv4 {
         }
 
         // Reverse it so that we start from the top
-        ip = ip.into_iter().rev().collect();
+        // ip = ip.into_iter().rev().collect();
 
         // convert to array
         let ip: [u8; 4] = ip
             .try_into()
             .unwrap_or_else(|_: Vec<u8>| panic!("Unable to convert Vec to [u8; 4] for IPv4!"));
 
-        Self {
-            id,
-            ip
-        }
+        Self { id, ip }
     }
 
     pub fn to_ipaddr(self: &mut Self) -> Result<IpAddr> {
@@ -63,7 +60,7 @@ impl IPv4Range {
         let to = to.clamp(0, u32::max_value());
 
         if from >= to {
-            panic!("Range size must be >= 1! from: {} >= to: {}", from, to);
+            panic!("Range size must be >= 1! from={} >= to={}", from, to);
         }
 
         Self {

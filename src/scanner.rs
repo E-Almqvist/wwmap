@@ -1,6 +1,6 @@
 use crate::ipv4::{IPv4, IPv4Range};
 use core::time::Duration;
-use log::{info, warn, debug};
+use log::{debug, info, warn};
 use std::net::TcpStream;
 use std::thread::JoinHandle;
 use std::{panic, thread};
@@ -60,13 +60,39 @@ fn get_scan_workers(
     num_threads: u64,
     ignorelist: Option<Vec<u32>>,
 ) -> Vec<JoinHandle<Vec<(u32, bool)>>> {
-    let ips_per_thread: u64 = (((to - from) as f32) / num_threads as f32) as u64;
+
+    let ip_amount = to - from;
+    let ips_per_thread: u64 = ((ip_amount as f32) / num_threads as f32) as u64;
+
     println!("{} : {}", num_threads, ips_per_thread);
-    let ips_left: u64 = (to - from) as u64 - (num_threads * ips_per_thread) as u64; // how many ips we have left after the first threads
-    println!("{} | {}", to - from, 2);
+    println!(
+        "{} - {} = {} | {}",
+        to,
+        from,
+        to - from,
+        num_threads * ips_per_thread
+    );
 
     // container for all of our threads
     let mut threads: Vec<JoinHandle<Vec<(u32, bool)>>> = Vec::new();
+
+    // how many ips we have left after the first threads
+    if ((to - from) as u64 % num_threads) != 0 {
+        println!(";(");
+        let ips_left: u64 = ip_amount as u64 - (num_threads * ips_per_thread) as u64;
+
+        // Clean up the rest
+        warn!("Number of IPv4 addresses is not divisible by the amount of threads! Creating extra thread...");
+        let id_ignorelist = ignorelist.clone().unwrap_or_default();
+        let worker = create_scan_worker(
+            threads.len() as u64 + 1,
+            ips_left,
+            target_port,
+            id_ignorelist,
+        );
+        threads.push(worker);
+    };
+
 
     // TODO: make last thread do the "ips_left" work
     for thread_id in 0..num_threads {
@@ -78,18 +104,6 @@ fn get_scan_workers(
         threads.push(worker);
     }
 
-    // Clean up the rest
-    if ips_left > 0 {
-        warn!("Number of IPv4 addresses is not divisible by the amount of threads! Creating extra thread...");
-        let id_ignorelist = ignorelist.clone().unwrap_or_default();
-        let worker = create_scan_worker(
-            threads.len() as u64 + 1,
-            ips_per_thread,
-            target_port,
-            id_ignorelist,
-        );
-        threads.push(worker);
-    }
 
     threads
 }
@@ -126,7 +140,7 @@ pub fn start_scan(
 
     // Run all the workers
     for worker in scan_workers {
-        println!("* Running worker: {:?}", worker);
+        println!("* Running worker:");
         let result_tuples = match worker.join() {
             Ok(r) => r,
             Err(e) => panic!("{:?}", e),
@@ -137,7 +151,7 @@ pub fn start_scan(
             .map(|res| ScanResult::from_tuple(*res))
             .collect();
 
-        println!("\t* Worker got results: {:?}", result_tuples);
+        println!("\t* Worker result: {:?}", result_tuples);
         results.append(&mut worker_results);
     }
 
