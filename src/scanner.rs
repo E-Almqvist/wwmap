@@ -1,7 +1,6 @@
 use crate::ipv4::{IPv4, IPv4Range};
-use anyhow::Result;
 use log::info;
-use std::net::{SocketAddr, TcpStream};
+use std::net::TcpStream;
 use std::thread::JoinHandle;
 use std::{panic, thread};
 
@@ -66,9 +65,6 @@ fn get_scan_workers(
     // container for all of our threads
     let mut threads: Vec<JoinHandle<Vec<(u32, bool)>>> = Vec::new();
 
-    // container for all of our results
-    let mut results: Vec<(u32, bool)> = Vec::new();
-
     for thread_id in 0..num_threads {
         let id_ignorelist = ignorelist.clone().unwrap_or_default();
 
@@ -82,7 +78,7 @@ fn get_scan_workers(
     if ips_left > 0 {
         let id_ignorelist = ignorelist.clone().unwrap_or_default();
         let worker = create_scan_worker(
-            results.len() as u32 + 1,
+            threads.len() as u32 + 1,
             ips_per_thread,
             target_port,
             id_ignorelist,
@@ -99,21 +95,22 @@ pub fn start_scan(
     target_port: u16,
     num_threads: u32,
     ignorelist: Option<Vec<u32>>,
-) {
+) -> Vec<Vec<(u32, bool)>> {
 
     // Get the workers
     let scan_workers = get_scan_workers(from, to, target_port, num_threads, ignorelist);
 
-    let results: Vec<Vec<(u32, bool)>>  = Vec::new();
+    let mut results: Vec<Vec<(u32, bool)>>  = Vec::new();
     
-    // Run everyone
+    // Run all the workers 
     for worker in scan_workers {
-        let mut result = worker.join();
+        let result = match worker.join() {
+            Ok(r) => r,
+            Err(e) => panic!("{:?}", e)
+        };
 
-        match result {
-            Ok(_) => return result.unwrap(),
-            Err(e) => panic!(":(")
-        }
-
+        results.push(result);
     }
+
+    results
 }
