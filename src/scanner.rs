@@ -99,26 +99,26 @@ pub fn start_scan(
     target_port: u16,
     num_threads: u32,
     ignorelist: Option<Vec<u32>>,
-) -> Vec<Vec<(u32, bool)>> {
+) -> Vec<(u32, bool)> {
 
     // Get the workers
     println!("Getting workers..");
     let scan_workers = get_scan_workers(from, to, target_port, num_threads, ignorelist);
 
-    let mut results: Vec<Vec<(u32, bool)>>  = Vec::new();
+    let mut results: Vec<(u32, bool)>  = Vec::new();
     
     // Run all the workers 
     println!("Running workers:");
     for worker in scan_workers {
         print!("\t* worker={:?}", worker);
-        let result = match worker.join() {
+        let mut result = match worker.join() {
             Ok(r) => r,
             Err(e) => panic!("{:?}", e)
         };
 
         println!(" result={:?}", result);
 
-        results.push(result);
+        results.append(&mut result);
     }
 
     println!("End of scan!");
