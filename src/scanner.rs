@@ -47,7 +47,7 @@ fn create_scan_worker(
 ) -> JoinHandle<Vec<(u32, bool)>> {
     let (f, t) = (
         (thread_id * ips_per_thread),
-        ((thread_id + 1) * ips_per_thread),
+        ((thread_id + 1) * ips_per_thread - 1),
     );
     let range = IPv4Range::new(f as u32, t as u32, ignorelist);
     create_scan_thread(thread_id, range, target_port)
@@ -60,9 +60,10 @@ fn get_scan_workers(
     num_threads: u64,
     ignorelist: Option<Vec<u32>>,
 ) -> Vec<JoinHandle<Vec<(u32, bool)>>> {
-
     let ip_amount = to - from;
-    let ips_per_thread: u64 = ((ip_amount as f32) / num_threads as f32) as u64;
+    let ips_per_thread: u64 = ((ip_amount as f32) / num_threads as f32).floor() as u64;
+
+    println!("****** {}", (ip_amount as f32) / num_threads as f32);
 
     println!("{} : {}", num_threads, ips_per_thread);
     println!(
@@ -76,8 +77,18 @@ fn get_scan_workers(
     // container for all of our threads
     let mut threads: Vec<JoinHandle<Vec<(u32, bool)>>> = Vec::new();
 
+    // TODO: make last thread do the "ips_left" work
+    for thread_id in 0..num_threads {
+        let id_ignorelist = ignorelist.clone().unwrap_or_default();
+
+        // Create a worker
+        let worker = create_scan_worker(thread_id, ips_per_thread, target_port, id_ignorelist);
+
+        threads.push(worker);
+    }
+
     // how many ips we have left after the first threads
-    if ((to - from) as u64 % num_threads) != 0 {
+    if (ip_amount as u64 % num_threads) != 0 {
         println!(";(");
         let ips_left: u64 = ip_amount as u64 - (num_threads * ips_per_thread) as u64;
 
@@ -92,18 +103,6 @@ fn get_scan_workers(
         );
         threads.push(worker);
     };
-
-
-    // TODO: make last thread do the "ips_left" work
-    for thread_id in 0..num_threads {
-        let id_ignorelist = ignorelist.clone().unwrap_or_default();
-
-        // Create a worker
-        let worker = create_scan_worker(thread_id, ips_per_thread, target_port, id_ignorelist);
-
-        threads.push(worker);
-    }
-
 
     threads
 }
