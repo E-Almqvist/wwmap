@@ -10,5 +10,7 @@ use scanner::start_scan;
 fn main() {
     let args = Args::parse();
 
-    let _results = start_scan(args.from, args.to, args.port, args.threads as u32, None);
+    let results = start_scan(args.from, args.to, args.port, args.threads as u32, None);
+
+    for result in results { println!("{:?}", result); }
 }

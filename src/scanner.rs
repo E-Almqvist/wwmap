@@ -1,5 +1,6 @@
 use crate::ipv4::{IPv4, IPv4Range};
 use log::info;
+use core::time::Duration;
 use std::net::TcpStream;
 use std::thread::JoinHandle;
 use std::{panic, thread};
@@ -9,7 +10,9 @@ fn tcp_scan(mut target: IPv4, target_port: u16) -> bool {
         .to_socketaddr(target_port)
         .unwrap_or_else(|e| panic!("{}", e));
 
-    if let Ok(res) = TcpStream::connect(dest) {
+    let timeout = Duration::new(1, 0);
+
+    if let Ok(res) = TcpStream::connect_timeout(&dest, timeout) {
         info!("* Got TCP ack from: {:?} | {:?}", dest, res);
         return true;
     }
@@ -65,6 +68,7 @@ fn get_scan_workers(
     // container for all of our threads
     let mut threads: Vec<JoinHandle<Vec<(u32, bool)>>> = Vec::new();
 
+    // TODO: make last thread do the "ips_left" work
     for thread_id in 0..num_threads {
         let id_ignorelist = ignorelist.clone().unwrap_or_default();
 
@@ -98,19 +102,26 @@ pub fn start_scan(
 ) -> Vec<Vec<(u32, bool)>> {
 
     // Get the workers
+    println!("Getting workers..");
     let scan_workers = get_scan_workers(from, to, target_port, num_threads, ignorelist);
 
     let mut results: Vec<Vec<(u32, bool)>>  = Vec::new();
     
     // Run all the workers 
+    println!("Running workers:");
     for worker in scan_workers {
+        print!("\t* worker={:?}", worker);
         let result = match worker.join() {
             Ok(r) => r,
             Err(e) => panic!("{:?}", e)
         };
 
+        println!(" result={:?}", result);
+
         results.push(result);
     }
+
+    println!("End of scan!");
 
     results
 }

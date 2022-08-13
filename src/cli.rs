@@ -30,7 +30,7 @@ pub struct Args {
         help = "To IPv4 -",
         short = 't',
         long = "to",
-        default_value_t = 4294967295
+        default_value_t = u32::max_value()
     )]
     pub to: u32,
 
