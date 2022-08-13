@@ -1,6 +1,6 @@
 use crate::ipv4::{IPv4, IPv4Range};
 use core::time::Duration;
-use log::info;
+use log::{info, warn, debug};
 use std::net::TcpStream;
 use std::thread::JoinHandle;
 use std::{panic, thread};
@@ -80,6 +80,7 @@ fn get_scan_workers(
 
     // Clean up the rest
     if ips_left > 0 {
+        warn!("Number of IPv4 addresses is not divisible by the amount of threads! Creating extra thread...");
         let id_ignorelist = ignorelist.clone().unwrap_or_default();
         let worker = create_scan_worker(
             threads.len() as u32 + 1,
@@ -95,16 +96,15 @@ fn get_scan_workers(
 
 #[derive(Debug)]
 pub struct ScanResult {
-    pub id: u32,
-    pub ipv4: IPv4,
+    pub target: IPv4,
     pub result: bool,
 }
 
 impl ScanResult {
     fn from_tuple(result_tuple: (u32, bool)) -> Self {
         let (id, result) = result_tuple;
-        let ipv4 = IPv4::new(id as u64);
-        Self { id, ipv4, result }
+        let target = IPv4::new(id as u64);
+        Self { target, result }
     }
 }
 
@@ -115,15 +115,18 @@ pub fn start_scan(
     num_threads: u32,
     ignorelist: Option<Vec<u32>>,
 ) -> Vec<ScanResult> {
-    // Get the workers
+    info!("Starting wwmap scan...");
 
+    // Get the workers
+    debug!("Getting scan workers...");
     let scan_workers = get_scan_workers(from, to, target_port, num_threads, ignorelist);
+    debug!("Loaded {} scan worker(s).", scan_workers.len());
 
     let mut results: Vec<ScanResult> = Vec::new();
 
     // Run all the workers
     for worker in scan_workers {
-        print!("\t* worker={:?}", worker);
+        debug!("* Running worker: {:?}", worker);
         let result_tuples = match worker.join() {
             Ok(r) => r,
             Err(e) => panic!("{:?}", e),
@@ -134,11 +137,10 @@ pub fn start_scan(
             .map(|res| ScanResult::from_tuple(*res))
             .collect();
 
-        //let result = ScanResult::from_tuple(result_tuples);
+        debug!("\t* Worker got results: {:?}", result_tuples);
         results.append(&mut worker_results);
     }
 
-    println!("End of scan!");
-
+    info!("Scan finished!");
     results
 }
