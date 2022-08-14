@@ -43,7 +43,7 @@ impl IPv4 {
         Self { id, ip }
     }
 
-    pub fn to_ipaddr(self: &mut Self) -> Result<IpAddr> {
+    pub fn to_ipaddr(self: &mut Self) -> Result<IpAddr> { // TODO: remove unneeded Result returns
         if let [a, b, c, d] = self.ip[0..4] {
             Ok(IpAddr::V4(Ipv4Addr::new(a, b, c, d)))
         } else {
@@ -57,6 +57,7 @@ impl IPv4 {
     }
 }
 
+#[derive(Debug)]
 pub struct IPv4Range {
     pub id_start: u32,
     pub id_end: u32,
@@ -68,8 +69,8 @@ impl IPv4Range {
         let to = to.clamp(0, u32::max_value());
         let id_ignore = id_ignore.unwrap_or(Vec::new());
 
-        if from >= to {
-            panic!("Range size must be >= 1! from={} >= to={}", from, to);
+        if from > to {
+            panic!("Range size must be >= 1! from={} > to={}", from, to);
         }
 
         Self {
@@ -80,8 +81,10 @@ impl IPv4Range {
     }
 
     pub fn from_cidr(cidr_string: String, id_ignore: Option<Vec<u32>>) -> Self {
-        let cidr = Ipv4Cidr::from_str(cidr_string).unwrap();
-        let (from, to) = (cidr.first(), cidr.last());
+        let cidr = Ipv4Cidr::from_str(cidr_string).unwrap(); 
+        let (from, to) = (cidr.first(), cidr.last()); // TODO: fix forgotten "constants"
+
+        println!("{:?}", cidr.last_as_u8_array());
 
         Self::new(from, to, id_ignore)
     }

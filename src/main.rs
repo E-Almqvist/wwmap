@@ -9,7 +9,10 @@ use ipv4::IPv4Range;
 use scanner::start_scan;
 
 fn main() {
-    // Get CLI arguments
+    // Init the logger
+    env_logger::init();
+
+    // Get the CLI arguments
     let args = Args::parse();
 
     // Get the IP range

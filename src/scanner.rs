@@ -1,6 +1,6 @@
 use crate::ipv4::{IPv4, IPv4Range};
 use core::time::Duration;
-use log::warn;
+use log::{warn, debug, info};
 use std::net::TcpStream;
 use std::thread::JoinHandle;
 use std::{panic, thread};
@@ -13,9 +13,10 @@ fn tcp_scan(mut target: IPv4, target_port: u16) -> bool {
     let timeout = Duration::new(1, 0);
 
     if let Ok(_res) = TcpStream::connect_timeout(&dest, timeout) {
-        println!("* {:?}", dest);
+        println!("{:?}", dest);
         true
     } else {
+        debug!("Timeout * {:?}", dest);
         false
     }
 }
@@ -23,6 +24,7 @@ fn tcp_scan(mut target: IPv4, target_port: u16) -> bool {
 fn create_scan_thread(ip_range: IPv4Range, target_port: u16) -> JoinHandle<Vec<(u32, bool)>> {
     thread::spawn(move || {
         let mut results: Vec<(u32, bool)> = Vec::new();
+        debug!("Created scan worker for IPv4 range: {:?}", ip_range);
 
         // do the scan thing
         ip_range.into_iter().for_each(|id| {
@@ -63,6 +65,7 @@ fn get_scan_workers(
     let mut threads: Vec<JoinHandle<Vec<(u32, bool)>>> = Vec::new();
 
     // TODO: make last thread do the "ips_left" work
+    debug!("Creating scan workers...");
     for thread_id in 0..num_threads {
         let id_ignorelist = range.id_ignore.clone();
 
@@ -111,7 +114,7 @@ pub fn start_scan(range: IPv4Range, target_port: u16, num_threads: u64) -> Vec<S
 
     // Get the workers
     let scan_workers = get_scan_workers(range, target_port, num_threads);
-    println!("Loaded {} scan worker(s).", scan_workers.len());
+    info!("Loaded {} scan worker(s).", scan_workers.len());
 
     let mut results: Vec<ScanResult> = Vec::new();
 
@@ -130,5 +133,7 @@ pub fn start_scan(range: IPv4Range, target_port: u16, num_threads: u64) -> Vec<S
         results.append(&mut worker_results);
     }
 
+
+    println!("Scan finished with {} result(s).", results.len());
     results
 }
