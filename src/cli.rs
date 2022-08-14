@@ -4,7 +4,7 @@ use std::path::PathBuf;
 #[derive(Parser, Debug)]
 #[clap(name = "World Wide Mapping", version, about = "Scan the world wide web for a certian port.", long_about = None)]
 pub struct Args {
-    #[clap(help = "Which port to scan for.", short = 'p', long = "port")]
+    #[clap(help = "Which port to scan for.")]
     pub port: u16,
 
     #[clap(
@@ -23,17 +23,6 @@ pub struct Args {
     )]
     pub ignorelist: PathBuf,
 
-    #[clap(help = "From IPv4 -", short = 'f', long = "from", default_value_t = 0)]
-    pub from: u32,
-
-    #[clap(
-        help = "To IPv4 -",
-        short = 't',
-        long = "to",
-        default_value_t = u32::max_value()
-    )]
-    pub to: u32,
-
     #[clap(
         help = "Enable verbose (debug) output",
         short = 'v',
@@ -45,8 +34,6 @@ pub struct Args {
 
     #[clap(
         help = "IPv4 subnet range (CIDR). Leave empty for the whole internet.",
-        short = 'r',
-        long = "range",
         default_value = "0.0.0.0/0",
         required = false
     )]

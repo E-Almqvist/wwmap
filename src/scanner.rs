@@ -45,17 +45,17 @@ fn create_scan_worker(
         (thread_id * ips_per_thread),
         ((thread_id + 1) * ips_per_thread - 1),
     );
-    let range = IPv4Range::new(f as u32, t as u32, ignorelist);
+    let range = IPv4Range::new(f as u32, t as u32, Some(ignorelist));
     create_scan_thread(range, target_port)
 }
 
 fn get_scan_workers(
-    from: u32,
-    to: u32,
+    range: IPv4Range,
     target_port: u16,
     num_threads: u64,
-    ignorelist: Option<Vec<u32>>,
 ) -> Vec<JoinHandle<Vec<(u32, bool)>>> {
+    let (from, to) = (range.id_start, range.id_end);
+
     let ip_amount: u64 = (to as u64 - from as u64) + 1;
     let ips_per_thread: u64 = ((ip_amount as f32) / num_threads as f32).floor() as u64;
 
@@ -64,7 +64,7 @@ fn get_scan_workers(
 
     // TODO: make last thread do the "ips_left" work
     for thread_id in 0..num_threads {
-        let id_ignorelist = ignorelist.clone().unwrap_or_default();
+        let id_ignorelist = range.id_ignore.clone();
 
         // Create a worker
         let worker = create_scan_worker(thread_id, ips_per_thread, target_port, id_ignorelist);
@@ -79,7 +79,7 @@ fn get_scan_workers(
 
         // Clean up the rest
         warn!("Number of IPv4 addresses is not divisible by the amount of threads! Creating extra thread...");
-        let id_ignorelist = ignorelist.clone().unwrap_or_default();
+        let id_ignorelist = range.id_ignore.clone();
         let worker = create_scan_worker(
             threads.len() as u64 + 1,
             ips_left,
@@ -106,17 +106,11 @@ impl ScanResult {
     }
 }
 
-pub fn start_scan(
-    from: u32,
-    to: u32,
-    target_port: u16,
-    num_threads: u64,
-    ignorelist: Option<Vec<u32>>,
-) -> Vec<ScanResult> {
+pub fn start_scan(range: IPv4Range, target_port: u16, num_threads: u64) -> Vec<ScanResult> {
     println!("Starting wwmap scan...");
 
     // Get the workers
-    let scan_workers = get_scan_workers(from, to, target_port, num_threads, ignorelist);
+    let scan_workers = get_scan_workers(range, target_port, num_threads);
     println!("Loaded {} scan worker(s).", scan_workers.len());
 
     let mut results: Vec<ScanResult> = Vec::new();

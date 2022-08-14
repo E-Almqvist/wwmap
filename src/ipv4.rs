@@ -64,8 +64,9 @@ pub struct IPv4Range {
 }
 
 impl IPv4Range {
-    pub fn new(from: u32, to: u32, id_ignore: Vec<u32>) -> Self {
+    pub fn new(from: u32, to: u32, id_ignore: Option<Vec<u32>>) -> Self {
         let to = to.clamp(0, u32::max_value());
+        let id_ignore = id_ignore.unwrap_or(Vec::new());
 
         if from >= to {
             panic!("Range size must be >= 1! from={} >= to={}", from, to);
@@ -78,7 +79,7 @@ impl IPv4Range {
         }
     }
 
-    pub fn from_cidr(cidr_string: String, id_ignore: Vec<u32>) -> Self {
+    pub fn from_cidr(cidr_string: String, id_ignore: Option<Vec<u32>>) -> Self {
         let cidr = Ipv4Cidr::from_str(cidr_string).unwrap();
         let (from, to) = (cidr.first(), cidr.last());
 
