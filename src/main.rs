@@ -16,9 +16,5 @@ fn main() {
     let range = IPv4Range::from_cidr(args.cidr, None);
 
     // Start the scan
-    let results = start_scan(range, args.port, args.threads);
-
-    for result in results {
-        println!("{:?}", result);
-    }
+    let _results = start_scan(range, args.port, args.threads);
 }
