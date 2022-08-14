@@ -6,12 +6,19 @@ use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
 #[derive(Debug, Copy, Clone)]
 pub struct IPv4 {
-    pub id: u64,
+    pub id: u64, // u32
     pub ip: [u8; 4],
 }
 
 impl IPv4 {
     pub fn new(id: u64) -> Self {
+        if id > u32::max_value() as u64 {
+            panic!(
+                "IPv4 id is above the IPv4 range! id={id} > {}",
+                u32::max_value()
+            );
+        }
+
         let mut base = Convert::new(10, 256);
 
         let id_vec = util::number_to_vec(id); // push all digits into a vec

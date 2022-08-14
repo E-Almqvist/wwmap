@@ -20,10 +20,7 @@ fn tcp_scan(mut target: IPv4, target_port: u16) -> bool {
     }
 }
 
-fn create_scan_thread(
-    ip_range: IPv4Range,
-    target_port: u16,
-) -> JoinHandle<Vec<(u32, bool)>> {
+fn create_scan_thread(ip_range: IPv4Range, target_port: u16) -> JoinHandle<Vec<(u32, bool)>> {
     thread::spawn(move || {
         let mut results: Vec<(u32, bool)> = Vec::new();
 
@@ -59,7 +56,7 @@ fn get_scan_workers(
     num_threads: u64,
     ignorelist: Option<Vec<u32>>,
 ) -> Vec<JoinHandle<Vec<(u32, bool)>>> {
-    let ip_amount = to - from;
+    let ip_amount: u64 = (to as u64 - from as u64) + 1;
     let ips_per_thread: u64 = ((ip_amount as f32) / num_threads as f32).floor() as u64;
 
     // container for all of our threads
@@ -77,8 +74,8 @@ fn get_scan_workers(
 
     // how many ips we have left after the first threads
     if (ip_amount as u64 % num_threads) != 0 {
-        println!(";(");
-        let ips_left: u64 = ip_amount as u64 - (num_threads * ips_per_thread) as u64;
+        let completed_ips = (num_threads * ips_per_thread) as u64;
+        let ips_left: u64 = ip_amount as u64 - completed_ips;
 
         // Clean up the rest
         warn!("Number of IPv4 addresses is not divisible by the amount of threads! Creating extra thread...");
