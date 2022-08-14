@@ -1,5 +1,6 @@
 use crate::util;
 use anyhow::{anyhow, Result};
+use cidr_utils::cidr::Ipv4Cidr;
 use convert_base::Convert;
 use std::convert::TryInto;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
@@ -75,6 +76,13 @@ impl IPv4Range {
             id_end: to,
             id_ignore,
         }
+    }
+
+    pub fn from_cidr(cidr_string: String, id_ignore: Vec<u32>) -> Self {
+        let cidr = Ipv4Cidr::from_str(cidr_string).unwrap();
+        let (from, to) = (cidr.first(), cidr.last());
+
+        Self::new(from, to, id_ignore)
     }
 }
 

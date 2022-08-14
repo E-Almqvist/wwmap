@@ -42,4 +42,13 @@ pub struct Args {
         required = false
     )]
     pub verbose: bool,
+
+    #[clap(
+        help = "IPv4 subnet range (CIDR). Leave empty for the whole internet.",
+        short = 'r',
+        long = "range",
+        default_value = "0.0.0.0/0",
+        required = false
+    )]
+    pub cidr: String,
 }
