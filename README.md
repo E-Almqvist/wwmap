@@ -29,6 +29,7 @@ Scan a IPv4 range for a certain port.
 		-V, --version
 				Print version information
 
+
 ### Examples
 You can scan the whole internet for a HTTP server using this command: `$ wwmap 80 0.0.0.0/0`.
 
