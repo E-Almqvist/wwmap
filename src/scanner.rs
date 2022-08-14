@@ -1,6 +1,6 @@
 use crate::ipv4::{IPv4, IPv4Range};
 use core::time::Duration;
-use log::{info, warn};
+use log::warn;
 use std::net::TcpStream;
 use std::thread::JoinHandle;
 use std::{panic, thread};
@@ -126,7 +126,6 @@ pub fn start_scan(
 
     // Run all the workers
     for worker in scan_workers {
-        println!("* Running worker:");
         let result_tuples = match worker.join() {
             Ok(r) => r,
             Err(e) => panic!("{:?}", e),
