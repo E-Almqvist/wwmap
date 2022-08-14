@@ -2,33 +2,34 @@
 Scan a IPv4 range for a certain port.
 
 ## Usage
-Write: `$ wwmap --help` for help.
+`$ wwmap --help` for help.
 
-    USAGE:
-        wwmap [OPTIONS] --port <PORT>
 
-    OPTIONS:
-        -f, --from <FROM>
-                From IPv4 - [default: 0]
+	USAGE:
+		wwmap [OPTIONS] <PORT> [CIDR]
 
-        -h, --help
-                Print help information
+	ARGS:
+		<PORT>    Which port to scan for.
+		<CIDR>    IPv4 subnet range (CIDR). Leave empty for the whole internet. [default: 0.0.0.0/0]
 
-        -i, --ignore-ip-list <IGNORELIST>
-                A file containing ignored IPv4 addresses (seperated by linebreaks). [default:
-                ignore-ips-list.txt]
+	OPTIONS:
+		-h, --help
+				Print help information
 
-        -n, --threads <THREADS>
-                Amount of threads that will be used when scanning for the specified port. [default: 1]
+		-i, --ignore-ip-list <IGNORELIST>
+				A file containing ignored IPv4 addresses (seperated by linebreaks). [default:
+				ignore-ips-list.txt]
 
-        -p, --port <PORT>
-                Which port to scan for.
+		-n, --threads <THREADS>
+				Amount of threads that will be used when scanning for the specified port. [default: 1]
 
-        -t, --to <TO>
-                To IPv4 - [default: 4294967295]
+		-v, --verbose
+				Enable verbose (debug) output
 
-        -v, --verbose
-                Enable verbose (debug) output
+		-V, --version
+				Print version information
 
-        -V, --version
-                Print version information
+### Examples
+You can scan the whole internet for a HTTP server using this command: `$ wwmap 80 0.0.0.0/0`.
+
+It is recommended to use a large amount threads for large IPv4 ranges (like the whole internet). 
