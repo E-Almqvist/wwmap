@@ -1,6 +1,6 @@
 use crate::ipv4::{IPv4, IPv4Range};
 use core::time::Duration;
-use log::{debug, info, warn};
+use log::{info, warn};
 use std::net::TcpStream;
 use std::thread::JoinHandle;
 use std::{panic, thread};
@@ -12,9 +12,8 @@ fn tcp_scan(mut target: IPv4, target_port: u16) -> bool {
 
     let timeout = Duration::new(1, 0);
 
-    println!("Sending TCP packet to: {:?} port={}", target, target_port);
-    if let Ok(res) = TcpStream::connect_timeout(&dest, timeout) {
-        println!("** Got TCP ack from: {:?} | {:?}", dest, res);
+    if let Ok(_res) = TcpStream::connect_timeout(&dest, timeout) {
+        println!("* {:?}", dest);
         true
     } else {
         false
@@ -22,12 +21,10 @@ fn tcp_scan(mut target: IPv4, target_port: u16) -> bool {
 }
 
 fn create_scan_thread(
-    thread_id: u64,
     ip_range: IPv4Range,
     target_port: u16,
 ) -> JoinHandle<Vec<(u32, bool)>> {
     thread::spawn(move || {
-        println!("Creating thread worker #{}", thread_id);
         let mut results: Vec<(u32, bool)> = Vec::new();
 
         // do the scan thing
@@ -52,7 +49,7 @@ fn create_scan_worker(
         ((thread_id + 1) * ips_per_thread - 1),
     );
     let range = IPv4Range::new(f as u32, t as u32, ignorelist);
-    create_scan_thread(thread_id, range, target_port)
+    create_scan_thread(range, target_port)
 }
 
 fn get_scan_workers(
@@ -64,17 +61,6 @@ fn get_scan_workers(
 ) -> Vec<JoinHandle<Vec<(u32, bool)>>> {
     let ip_amount = to - from;
     let ips_per_thread: u64 = ((ip_amount as f32) / num_threads as f32).floor() as u64;
-
-    println!("****** {}", (ip_amount as f32) / num_threads as f32);
-
-    println!("{} : {}", num_threads, ips_per_thread);
-    println!(
-        "{} - {} = {} | {}",
-        to,
-        from,
-        to - from,
-        num_threads * ips_per_thread
-    );
 
     // container for all of our threads
     let mut threads: Vec<JoinHandle<Vec<(u32, bool)>>> = Vec::new();
@@ -130,10 +116,9 @@ pub fn start_scan(
     num_threads: u64,
     ignorelist: Option<Vec<u32>>,
 ) -> Vec<ScanResult> {
-    info!("Starting wwmap scan...");
+    println!("Starting wwmap scan...");
 
     // Get the workers
-    println!("Getting scan workers...");
     let scan_workers = get_scan_workers(from, to, target_port, num_threads, ignorelist);
     println!("Loaded {} scan worker(s).", scan_workers.len());
 
@@ -152,10 +137,8 @@ pub fn start_scan(
             .map(|res| ScanResult::from_tuple(*res))
             .collect();
 
-        println!("\t* Worker result: {:?}", result_tuples);
         results.append(&mut worker_results);
     }
 
-    info!("Scan finished!");
     results
 }
