@@ -5,13 +5,17 @@ use std::net::TcpStream;
 use std::thread::JoinHandle;
 use std::{panic, thread};
 
+static mut TCP_SCANS_ISSUED: u64 = 0;
+
 fn tcp_scan(mut target: IPv4, target_port: u16) -> bool {
     debug!("Starting scan on {:?}", target);
-    let dest = target
-        .to_socketaddr(target_port)
-        .unwrap_or_else(|e| panic!("{}", e));
+    let dest = target.to_socketaddr(target_port);
 
     let timeout = Duration::new(1, 0);
+
+    unsafe {
+        TCP_SCANS_ISSUED += 1;
+    }
 
     if let Ok(_res) = TcpStream::connect_timeout(&dest, timeout) {
         println!("{:?}", dest);
@@ -31,7 +35,9 @@ fn create_scan_thread(ip_range: IPv4Range, target_port: u16) -> JoinHandle<Vec<(
         ip_range.into_iter().for_each(|id| {
             let target = IPv4::new(id as u64);
             let result = tcp_scan(target, target_port);
-            results.push((id, result));
+            if result {
+                results.push((id, result));
+            }
         });
 
         results
@@ -130,6 +136,12 @@ pub fn start_scan(range: IPv4Range, target_port: u16, num_threads: u64) -> Vec<S
         results.append(&mut worker_results);
     }
 
-    println!("Scan finished with {} result(s).", results.len());
+    unsafe {
+        println!(
+            "Scan finished with {} result(s) with a total of {} scans.",
+            results.len(),
+            TCP_SCANS_ISSUED
+        );
+    }
     results
 }
