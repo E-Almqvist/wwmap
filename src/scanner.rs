@@ -6,6 +6,7 @@ use std::thread::JoinHandle;
 use std::{panic, thread};
 
 fn tcp_scan(mut target: IPv4, target_port: u16) -> bool {
+    debug!("Starting scan on {:?}", target);
     let dest = target
         .to_socketaddr(target_port)
         .unwrap_or_else(|e| panic!("{}", e));
@@ -38,14 +39,17 @@ fn create_scan_thread(ip_range: IPv4Range, target_port: u16) -> JoinHandle<Vec<(
 }
 
 fn create_scan_worker(
+    range: IPv4Range,
     thread_id: u64,
     ips_per_thread: u64,
     target_port: u16,
-    ignorelist: Vec<u32>,
 ) -> JoinHandle<Vec<(u32, bool)>> {
+    
+    let ignorelist = range.id_ignore;
+
     let (f, t) = (
-        (thread_id * ips_per_thread),
-        ((thread_id + 1) * ips_per_thread - 1),
+        (thread_id * ips_per_thread) + range.id_start as u64,
+        ((thread_id + 1) * ips_per_thread - 1) + range.id_end as u64,
     );
     let range = IPv4Range::new(f as u32, t as u32, Some(ignorelist));
     create_scan_thread(range, target_port)
@@ -67,10 +71,10 @@ fn get_scan_workers(
     // TODO: make last thread do the "ips_left" work
     debug!("Creating scan workers...");
     for thread_id in 0..num_threads {
-        let id_ignorelist = range.id_ignore.clone();
+        let range_copy = range.clone();
 
         // Create a worker
-        let worker = create_scan_worker(thread_id, ips_per_thread, target_port, id_ignorelist);
+        let worker = create_scan_worker(range_copy, thread_id, ips_per_thread, target_port);
 
         threads.push(worker);
     }
@@ -82,12 +86,11 @@ fn get_scan_workers(
 
         // Clean up the rest
         warn!("Number of IPv4 addresses is not divisible by the amount of threads! Creating extra thread...");
-        let id_ignorelist = range.id_ignore.clone();
         let worker = create_scan_worker(
+            range,
             threads.len() as u64 + 1,
             ips_left,
-            target_port,
-            id_ignorelist,
+            target_port
         );
         threads.push(worker);
     };
