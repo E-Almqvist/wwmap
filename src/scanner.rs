@@ -1,6 +1,6 @@
 use crate::ipv4::{IPv4, IPv4Range};
 use core::time::Duration;
-use log::{warn, debug, info};
+use log::{debug, info, warn};
 use std::net::TcpStream;
 use std::thread::JoinHandle;
 use std::{panic, thread};
@@ -44,7 +44,6 @@ fn create_scan_worker(
     ips_per_thread: u64,
     target_port: u16,
 ) -> JoinHandle<Vec<(u32, bool)>> {
-    
     let ignorelist = range.id_ignore;
 
     let (f, t) = (
@@ -86,12 +85,7 @@ fn get_scan_workers(
 
         // Clean up the rest
         warn!("Number of IPv4 addresses is not divisible by the amount of threads! Creating extra thread...");
-        let worker = create_scan_worker(
-            range,
-            threads.len() as u64 + 1,
-            ips_left,
-            target_port
-        );
+        let worker = create_scan_worker(range, threads.len() as u64 + 1, ips_left, target_port);
         threads.push(worker);
     };
 
@@ -135,7 +129,6 @@ pub fn start_scan(range: IPv4Range, target_port: u16, num_threads: u64) -> Vec<S
 
         results.append(&mut worker_results);
     }
-
 
     println!("Scan finished with {} result(s).", results.len());
     results

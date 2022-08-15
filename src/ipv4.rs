@@ -43,7 +43,8 @@ impl IPv4 {
         Self { id, ip }
     }
 
-    pub fn to_ipaddr(self: &mut Self) -> Result<IpAddr> { // TODO: remove unneeded Result returns
+    pub fn to_ipaddr(self: &mut Self) -> Result<IpAddr> {
+        // TODO: remove unneeded Result returns
         if let [a, b, c, d] = self.ip[0..4] {
             Ok(IpAddr::V4(Ipv4Addr::new(a, b, c, d)))
         } else {
@@ -80,7 +81,7 @@ impl IPv4Range {
     }
 
     pub fn from_cidr(cidr_string: String, id_ignore: Option<Vec<u32>>) -> Self {
-        let cidr = Ipv4Cidr::from_str(cidr_string).unwrap(); 
+        let cidr = Ipv4Cidr::from_str(cidr_string).unwrap();
         let (from, to) = (cidr.first(), cidr.last()); // TODO: fix forgotten "constants"
 
         Self::new(from, to, id_ignore)
