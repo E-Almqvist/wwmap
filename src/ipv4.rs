@@ -33,7 +33,7 @@ impl IPv4 {
         }
 
         // Reverse it so that we start from the top
-        // ip = ip.into_iter().rev().collect();
+        ip = ip.into_iter().rev().collect();
 
         // convert to array
         let ip: [u8; 4] = ip
@@ -57,7 +57,7 @@ impl IPv4 {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct IPv4Range {
     pub id_start: u32,
     pub id_end: u32,
@@ -66,7 +66,6 @@ pub struct IPv4Range {
 
 impl IPv4Range {
     pub fn new(from: u32, to: u32, id_ignore: Option<Vec<u32>>) -> Self {
-        let to = to.clamp(0, u32::max_value());
         let id_ignore = id_ignore.unwrap_or(Vec::new());
 
         if from > to {
@@ -83,6 +82,8 @@ impl IPv4Range {
     pub fn from_cidr(cidr_string: String, id_ignore: Option<Vec<u32>>) -> Self {
         let cidr = Ipv4Cidr::from_str(cidr_string).unwrap(); 
         let (from, to) = (cidr.first(), cidr.last()); // TODO: fix forgotten "constants"
+
+        println!("############### {} {}", from, to);
 
         println!("{:?}", cidr.last_as_u8_array());
 
