@@ -49,7 +49,7 @@ fn create_scan_worker(
 
     let (f, t) = (
         (thread_id * ips_per_thread) + range.id_start as u64,
-        ((thread_id + 1) * ips_per_thread - 1) + range.id_end as u64,
+        ((thread_id + 1) * ips_per_thread - 1) + range.id_start as u64,
     );
     let range = IPv4Range::new(f as u32, t as u32, Some(ignorelist));
     create_scan_thread(range, target_port)
