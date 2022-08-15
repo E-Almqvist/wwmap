@@ -82,7 +82,7 @@ impl IPv4Range {
 
     pub fn from_cidr(cidr_string: String, id_ignore: Option<Vec<u32>>) -> Self {
         let cidr = Ipv4Cidr::from_str(cidr_string).unwrap();
-        let (from, to) = (cidr.first(), cidr.last()); // TODO: fix forgotten "constants"
+        let (from, to) = (cidr.first(), cidr.last()); 
 
         Self::new(from, to, id_ignore)
     }
