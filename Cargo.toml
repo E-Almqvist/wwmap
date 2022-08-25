@@ -2,6 +2,16 @@
 name = "wwmap"
 version = "0.1.0"
 edition = "2021"
+license-file = "LICENSE"
+license = "GPL-2.0"
+readme = "README.md"
+repository = "https://github.com/E-Almqvist/wwmap"
+include = ["src/", "LICENSE-*", "README.md"]
+description = """
+World Wide Map, a IPv4 mapping tool to find specific ports in any given IPv4 range (CIDR range).
+"""
+keywords = ["wwmap", "masscan", "tool", "enumeration", "ipv4"]
+authors = ["Elias Almqvist"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
