@@ -16,6 +16,7 @@ fn tcp_scan(mut target: IPv4, target_port: u16, timeout: Duration) -> bool {
         TCP_SCANS_ISSUED += 1;
     }
 
+    // TODO: Fix closed port viewed as "open"
     if let Ok(_res) = TcpStream::connect_timeout(&dest, timeout) {
         println!("{:?}", dest);
         true
@@ -126,17 +127,20 @@ impl ScanResult {
 
 unsafe fn print_progress() {
     let percent_done = (TCP_SCANS_ISSUED as f64 / TARGET_SCAN_TOTAL as f64) * 100_f64;
-    println!("* Progress: {}/{} [{:.2}%]", TCP_SCANS_ISSUED, TARGET_SCAN_TOTAL, percent_done);
+    println!(
+        "* Progress: {}/{} [{:.2}%]",
+        TCP_SCANS_ISSUED, TARGET_SCAN_TOTAL, percent_done
+    );
 }
 
 fn create_progress_worker() -> JoinHandle<()> {
-    thread::spawn(move || {
-        loop {
-            unsafe { print_progress(); }
-
-            let dur = Duration::new(5, 0);
-            thread::sleep(dur);
+    thread::spawn(move || loop {
+        unsafe {
+            print_progress();
         }
+
+        let dur = Duration::new(5, 0);
+        thread::sleep(dur);
     })
 }
 
