@@ -6,6 +6,7 @@ use std::thread::JoinHandle;
 use std::{panic, thread};
 
 static mut TCP_SCANS_ISSUED: u64 = 0;
+static mut TARGET_SCAN_TOTAL: u32 = 0;
 
 fn tcp_scan(mut target: IPv4, target_port: u16, timeout: Duration) -> bool {
     debug!("Starting scan on {:?}", target);
@@ -123,13 +124,38 @@ impl ScanResult {
     }
 }
 
+unsafe fn print_progress() {
+    let percent_done = (TCP_SCANS_ISSUED as f64 / TARGET_SCAN_TOTAL as f64) * 100_f64;
+    println!("* Progress: {}/{} [{:.2}%]", TCP_SCANS_ISSUED, TARGET_SCAN_TOTAL, percent_done);
+}
+
+fn create_progress_worker() -> JoinHandle<()> {
+    thread::spawn(move || {
+        loop {
+            unsafe { print_progress(); }
+
+            let dur = Duration::new(5, 0);
+            thread::sleep(dur);
+        }
+    })
+}
+
 pub fn start_scan(
     range: IPv4Range,
     target_port: u16,
     num_threads: u64,
     timeout: Duration,
+    show_progress: bool,
 ) -> Vec<ScanResult> {
     println!("Starting wwmap scan...");
+
+    // Create progress worker
+    unsafe {
+        if show_progress {
+            TARGET_SCAN_TOTAL = range.length();
+            create_progress_worker();
+        }
+    }
 
     // Get the workers
     let scan_workers = get_scan_workers(range, target_port, num_threads, timeout);

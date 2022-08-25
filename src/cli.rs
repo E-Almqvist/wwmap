@@ -15,21 +15,14 @@ pub struct Args {
     )]
     pub threads: u64,
 
-    //     #[clap(
-    //         help = "A file containing ignored IPv4 addresses (seperated by linebreaks).",
-    //         short = 'i',
-    //         long = "ignore-ip-list",
-    //         default_value = "ignore-ips-list.txt"
-    //     )]
-    //     pub ignorelist: PathBuf,
     #[clap(
-        help = "Enable verbose (debug) output",
-        short = 'v',
-        long = "verbose",
+        help = "Show progress",
+        short = 'p',
+        long = "progress",
         takes_value = false,
         required = false
     )]
-    pub verbose: bool,
+    pub progress: bool,
 
     #[clap(
         help = "IPv4 subnet range (CIDR). Leave empty for the whole internet.",

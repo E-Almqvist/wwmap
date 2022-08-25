@@ -85,6 +85,10 @@ impl IPv4Range {
 
         Self::new(from, to, id_ignore)
     }
+
+    pub fn length(self: &Self) -> u32 {
+        self.id_end - self.id_start
+    }
 }
 
 impl Iterator for IPv4Range {

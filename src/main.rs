@@ -24,5 +24,5 @@ fn main() {
     let timeout = Duration::new(args.timeout, args.timeout_ns);
 
     // Start the scan
-    let _results = start_scan(range, args.port, args.threads, timeout);
+    let _results = start_scan(range, args.port, args.threads, timeout, args.progress);
 }
