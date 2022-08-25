@@ -37,4 +37,22 @@ pub struct Args {
         required = false
     )]
     pub cidr: String,
+
+    #[clap(
+        help = "Timeout duration in nanoseconds.",
+        default_value_t = 0,
+        short = 't',
+        long = "timeout-ns",
+        required = false
+    )]
+    pub timeout_ns: u32,
+
+    #[clap(
+        help = "Timeout duration in seconds.",
+        default_value_t = 1,
+        short = 'T',
+        long = "timeout",
+        required = false
+    )]
+    pub timeout: u64,
 }

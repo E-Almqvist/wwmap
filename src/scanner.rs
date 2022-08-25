@@ -7,11 +7,9 @@ use std::{panic, thread};
 
 static mut TCP_SCANS_ISSUED: u64 = 0;
 
-fn tcp_scan(mut target: IPv4, target_port: u16) -> bool {
+fn tcp_scan(mut target: IPv4, target_port: u16, timeout: Duration) -> bool {
     debug!("Starting scan on {:?}", target);
     let dest = target.to_socketaddr(target_port);
-
-    let timeout = Duration::new(1, 0);
 
     unsafe {
         TCP_SCANS_ISSUED += 1;
@@ -26,7 +24,11 @@ fn tcp_scan(mut target: IPv4, target_port: u16) -> bool {
     }
 }
 
-fn create_scan_thread(ip_range: IPv4Range, target_port: u16) -> JoinHandle<Vec<(u32, bool)>> {
+fn create_scan_thread(
+    ip_range: IPv4Range,
+    target_port: u16,
+    timeout: Duration,
+) -> JoinHandle<Vec<(u32, bool)>> {
     thread::spawn(move || {
         let mut results: Vec<(u32, bool)> = Vec::new();
         debug!("Created scan worker for IPv4 range: {:?}", ip_range);
@@ -34,7 +36,7 @@ fn create_scan_thread(ip_range: IPv4Range, target_port: u16) -> JoinHandle<Vec<(
         // do the scan thing
         ip_range.into_iter().for_each(|id| {
             let target = IPv4::new(id as u64);
-            let result = tcp_scan(target, target_port);
+            let result = tcp_scan(target, target_port, timeout);
             if result {
                 results.push((id, result));
             }
@@ -49,21 +51,23 @@ fn create_scan_worker(
     thread_id: u64,
     ips_per_thread: u64,
     target_port: u16,
+    timeout: Duration,
 ) -> JoinHandle<Vec<(u32, bool)>> {
     let ignorelist = range.id_ignore;
 
     let (f, t) = (
-        (thread_id * ips_per_thread) + range.id_start as u64,
-        ((thread_id + 1) * ips_per_thread - 1) + range.id_start as u64,
+        (thread_id * ips_per_thread) + (range.id_start as u64),
+        ((thread_id + 1) * ips_per_thread - 1_u64) + range.id_start as u64,
     );
     let range = IPv4Range::new(f as u32, t as u32, Some(ignorelist));
-    create_scan_thread(range, target_port)
+    create_scan_thread(range, target_port, timeout)
 }
 
 fn get_scan_workers(
     range: IPv4Range,
     target_port: u16,
     num_threads: u64,
+    timeout: Duration,
 ) -> Vec<JoinHandle<Vec<(u32, bool)>>> {
     let (from, to) = (range.id_start, range.id_end);
 
@@ -79,7 +83,8 @@ fn get_scan_workers(
         let range_copy = range.clone();
 
         // Create a worker
-        let worker = create_scan_worker(range_copy, thread_id, ips_per_thread, target_port);
+        let worker =
+            create_scan_worker(range_copy, thread_id, ips_per_thread, target_port, timeout);
 
         threads.push(worker);
     }
@@ -91,7 +96,13 @@ fn get_scan_workers(
 
         // Clean up the rest
         warn!("Number of IPv4 addresses is not divisible by the amount of threads! Creating extra thread...");
-        let worker = create_scan_worker(range, threads.len() as u64 + 1, ips_left, target_port);
+        let worker = create_scan_worker(
+            range,
+            threads.len() as u64 + 1,
+            ips_left,
+            target_port,
+            timeout,
+        );
         threads.push(worker);
     };
 
@@ -112,11 +123,16 @@ impl ScanResult {
     }
 }
 
-pub fn start_scan(range: IPv4Range, target_port: u16, num_threads: u64) -> Vec<ScanResult> {
+pub fn start_scan(
+    range: IPv4Range,
+    target_port: u16,
+    num_threads: u64,
+    timeout: Duration,
+) -> Vec<ScanResult> {
     println!("Starting wwmap scan...");
 
     // Get the workers
-    let scan_workers = get_scan_workers(range, target_port, num_threads);
+    let scan_workers = get_scan_workers(range, target_port, num_threads, timeout);
     info!("Loaded {} scan worker(s).", scan_workers.len());
 
     let mut results: Vec<ScanResult> = Vec::new();
